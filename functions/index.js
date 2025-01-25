@@ -8,11 +8,17 @@ const bodyParser = require('body-parser'); // Optional, if using form data
 const app = express();
 const PORT = 3000;
 
+//app.use(cors({ origin: 'http://localhost:4200' }));
+app.use(cors({ origin: 'https://aarioushashion.web.app' }));
+
+
+
 // Middleware to parse JSON request bodies
 app.use(express.json()); // For parsing application/json
 
 // Middleware to parse URL-encoded bodies (if you're using form data)
 app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+
 
 
 
@@ -23,6 +29,7 @@ app.post("/send-email", async (req, res) => {
      username, 
      productname,
     orderdate,
+    deliverydate,
     orderid,
     addresline1,
     addresline2,
@@ -36,6 +43,9 @@ app.post("/send-email", async (req, res) => {
 
  } = req.body;
 
+
+
+ //console.log("Send email to "+sendto);
  
 
  const emailSubject = "Your Order for "+productname+" has been successfully placed";
@@ -98,7 +108,7 @@ app.post("/send-email", async (req, res) => {
  + "              <table width=\"360\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" align=\"left\" style=\"margin-bottom:20px;padding-left:15px\">\r\n"
  + "               <tbody>\r\n"
  + "                <tr>\r\n"
- + "                 <td class=\"m_-1267630119282308col\" valign=\"top\"><img src=\"https://ci4.googleusercontent.com/proxy/kEYhoZr5WYwGswGbrtaies_zHFOqa0MI5U5JbfgopQ4XZ3Y3XDIqWK9yRA78HEHDt13SwQuRLud6Z7uuLey8cxXrkv-twYGZbuXTdXTJgJDKvo-nvt4vU4dJ9i8JN1B1NOMRexJjN5-F3EVuicWmhmjhbW6piY1or5uRopM=s0-d-e1-ft#https://rukminim1.flixcart.com/www/270/28/promos/07/03/2018/f0e74e39-2481-4e34-b8f6-d2ab80ac15fe.png?q=100\" alt=\"journey\" style=\"margin-bottom:20px\" class=\"CToWUd\"><p style=\"font-family:Arial;font-size:12px;line-height:1.42;color:#212121;margin-top:0px;margin-bottom:20px\"><span style=\"display:inline-block;width:125px;vertical-align:top\"> Delivery </span><span style=\"font-family:Arial;font-size:12px;font-weight:bold;line-height:1.42;color:#139b3b;display:inline-block;width:220px\">by "+orderdate+"</span> <span style=\"display:block;font-family:Arial;font-size:10px;color:#878787;margin-top:4px\">Please refer to items list for delivery time of individual items </span> </p> <p style=\"font-family:Arial;font-size:12px;line-height:1.42;color:#212121;margin-bottom:20px;margin-top:0px\"><span style=\"display:inline-block;width:125px;min-width:125px;max-width:125px\">Amount Payable</span><span style=\"font-family:Arial;font-size:12px;font-weight:bold;line-height:1.42;color:#139b3b;display:inline-block;width:220px\">Rs. "+amount+"</span></p> <p style=\"margin-bottom:0px;margin-top:0\"><a href=\"https://myshop-d60a1.web.app/userorder\" style=\"background-color:rgb(41,121,251);color:#fff;padding:0px;border:0px;font-size:14px;display:inline-block;margin-top:0px;border-radius:2px;text-decoration:none;width:160px;text-align:center;line-height:32px;line-height:32px\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?q=http://delivery.nct.flipkart.com/QRFNSEO?id%3D88656%3DehkDAAoOVwYCTFAABwQID1RQWgxTBQcLVAZUBgULUFVdBlAEAA9VUFdVUVxbUAkJUABFVAdXBwAEVwQPUVdQAwgBVlFWBVBSBQkNXFMHWQkGBVpWA1BWBgIAAEsFBFYFAVQBAgUFVgsMCQBSU0hQTUYTAxoaUABeW0cERU0cDVRNS1VcW0YKUkZEGgYMWRdoYCV3ZnB7WltWTRcE%26fl%3DURFHQAgZTl8aVlgME19ZS0ZNWlpYGxEdUV0IVF8dMQZxNnReVGw5Y1F2TQY8VkFYQS1/UAZ6LV9qc1hdQHs7VndTfVlLYQtAR3FlMFZ6TE5ELGBRT3k3H1p9J1NQAQBbcwhjXmpHGVV9VF4WLXFZbV5OD0ZSWDV0a2sOQ0x7KEMLJkdjZVslbEYDYi0hBlFMaxEMeWdHCllXeQNkWGEKRFhId2F4UhNkfARyXTdXbnNbOl5kYHYNYHBfKHUAABIOcCF6X1FuAkNAVnUHGQxeWmECCl5ZdlV%2BdwMPXVB2CkF0OgYAX2MVWHF/ZjM1fH5vXwlWDGEBHwVUfFlmfgAoX2ABYR1CAgNlAHFQXU4EWlQCIGhMWwMNAXFEKgdkdCxEUixpSFRTD3VOUnoAWgR9eAEmAAICW1ZXegA%2BdHwCOnJRDkJRdW8DckJGRlwbU0prQVBufnJbMHQGcD4Ae0cJAFNURXpFQRdiZ0JVCCtZFW4CE35YVH4dXnMFDl4FAARoSVJUXmQOBnJsalsSAEdVXWorXnhvYiNLSkEiXEADE3UNNXwHfUUEZ3tdUAgTTFsMcRlcVmV2XAJ4UgJ0ZH9bcXImfwJjDyxReVNdIFFkSgBUDHN9dwAhBGRXCkBFAC1waFAKe2gHDXJ9ZAFSNgJITmAVckJDBQJRYQUvZVpzEEdIVnhpZmxVUH1aBCEOTV9gVVNccAFWBwcLczZSUWMzBAkOVkpDcglGRAddNwFTUn1KLlgCUnNXRnQELXxhUDB%2Bfj1nAV5BC0Z7fX4EC2QLekMEW3RFTDAFX3kgbWt9%26ext%3DZT10cnVl&amp;source=gmail&amp;ust=1653833840297000&amp;usg=AOvVaw3xzyZiwbYCZqABKYxoFE0k\">Manage Your Order</a></p> </td>\r\n"
+ + "                 <td class=\"m_-1267630119282308col\" valign=\"top\"><img src=\"https://ci4.googleusercontent.com/proxy/kEYhoZr5WYwGswGbrtaies_zHFOqa0MI5U5JbfgopQ4XZ3Y3XDIqWK9yRA78HEHDt13SwQuRLud6Z7uuLey8cxXrkv-twYGZbuXTdXTJgJDKvo-nvt4vU4dJ9i8JN1B1NOMRexJjN5-F3EVuicWmhmjhbW6piY1or5uRopM=s0-d-e1-ft#https://rukminim1.flixcart.com/www/270/28/promos/07/03/2018/f0e74e39-2481-4e34-b8f6-d2ab80ac15fe.png?q=100\" alt=\"journey\" style=\"margin-bottom:20px\" class=\"CToWUd\"><p style=\"font-family:Arial;font-size:12px;line-height:1.42;color:#212121;margin-top:0px;margin-bottom:20px\"><span style=\"display:inline-block;width:125px;vertical-align:top\"> Delivery </span><span style=\"font-family:Arial;font-size:12px;font-weight:bold;line-height:1.42;color:#139b3b;display:inline-block;width:220px\">by "+deliverydate+"</span> <span style=\"display:block;font-family:Arial;font-size:10px;color:#878787;margin-top:4px\">Please refer to items list for delivery time of individual items </span> </p> <p style=\"font-family:Arial;font-size:12px;line-height:1.42;color:#212121;margin-bottom:20px;margin-top:0px\"><span style=\"display:inline-block;width:125px;min-width:125px;max-width:125px\">Amount Payable</span><span style=\"font-family:Arial;font-size:12px;font-weight:bold;line-height:1.42;color:#139b3b;display:inline-block;width:220px\">Rs. "+amount+"</span></p> <p style=\"margin-bottom:0px;margin-top:0\"><a href=\"https://myshop-d60a1.web.app/userorder\" style=\"background-color:rgb(41,121,251);color:#fff;padding:0px;border:0px;font-size:14px;display:inline-block;margin-top:0px;border-radius:2px;text-decoration:none;width:160px;text-align:center;line-height:32px;line-height:32px\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?q=http://delivery.nct.flipkart.com/QRFNSEO?id%3D88656%3DehkDAAoOVwYCTFAABwQID1RQWgxTBQcLVAZUBgULUFVdBlAEAA9VUFdVUVxbUAkJUABFVAdXBwAEVwQPUVdQAwgBVlFWBVBSBQkNXFMHWQkGBVpWA1BWBgIAAEsFBFYFAVQBAgUFVgsMCQBSU0hQTUYTAxoaUABeW0cERU0cDVRNS1VcW0YKUkZEGgYMWRdoYCV3ZnB7WltWTRcE%26fl%3DURFHQAgZTl8aVlgME19ZS0ZNWlpYGxEdUV0IVF8dMQZxNnReVGw5Y1F2TQY8VkFYQS1/UAZ6LV9qc1hdQHs7VndTfVlLYQtAR3FlMFZ6TE5ELGBRT3k3H1p9J1NQAQBbcwhjXmpHGVV9VF4WLXFZbV5OD0ZSWDV0a2sOQ0x7KEMLJkdjZVslbEYDYi0hBlFMaxEMeWdHCllXeQNkWGEKRFhId2F4UhNkfARyXTdXbnNbOl5kYHYNYHBfKHUAABIOcCF6X1FuAkNAVnUHGQxeWmECCl5ZdlV%2BdwMPXVB2CkF0OgYAX2MVWHF/ZjM1fH5vXwlWDGEBHwVUfFlmfgAoX2ABYR1CAgNlAHFQXU4EWlQCIGhMWwMNAXFEKgdkdCxEUixpSFRTD3VOUnoAWgR9eAEmAAICW1ZXegA%2BdHwCOnJRDkJRdW8DckJGRlwbU0prQVBufnJbMHQGcD4Ae0cJAFNURXpFQRdiZ0JVCCtZFW4CE35YVH4dXnMFDl4FAARoSVJUXmQOBnJsalsSAEdVXWorXnhvYiNLSkEiXEADE3UNNXwHfUUEZ3tdUAgTTFsMcRlcVmV2XAJ4UgJ0ZH9bcXImfwJjDyxReVNdIFFkSgBUDHN9dwAhBGRXCkBFAC1waFAKe2gHDXJ9ZAFSNgJITmAVckJDBQJRYQUvZVpzEEdIVnhpZmxVUH1aBCEOTV9gVVNccAFWBwcLczZSUWMzBAkOVkpDcglGRAddNwFTUn1KLlgCUnNXRnQELXxhUDB%2Bfj1nAV5BC0Z7fX4EC2QLekMEW3RFTDAFX3kgbWt9%26ext%3DZT10cnVl&amp;source=gmail&amp;ust=1653833840297000&amp;usg=AOvVaw3xzyZiwbYCZqABKYxoFE0k\">Manage Your Order</a></p> </td>\r\n"
  + "                </tr>\r\n"
  + "               </tbody>\r\n"
  + "              </table>\r\n"
@@ -237,6 +247,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x
   try {
     const info = await transporter.sendMail(mailOptions);
     res.status(200).json({ message: "Email sent successfully", info });
+    console.log("Email sent successfully")
   } catch (error) {
     console.error("Error sending email:", error);
     res.status(500).json({ message: "Failed to send email", error });
@@ -244,10 +255,10 @@ app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x
 });
 
 // Export the app as a Firebase Function
-//exports.api = functions.https.onRequest(app);
+exports.api = functions.https.onRequest(app);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
+// app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+//   });
 
  
