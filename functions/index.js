@@ -2,14 +2,25 @@ const functions = require("firebase-functions");
 const nodemailer = require("nodemailer");
 const express = require("express");
 const cors = require("cors");
-
+const Razorpay = require('razorpay');
+const axios = require('axios');
 const bodyParser = require('body-parser'); // Optional, if using form data
 
 const app = express();
 const PORT = 3000;
 
-//app.use(cors({ origin: 'http://localhost:4200' }));
-app.use(cors({ origin: 'https://aarioushashion.web.app' }));
+
+const RAZORPAY_KEY_ID = 'rzp_test_rUx3Ufu3PNuJy8';  // Replace with your Razorpay Test Key
+ const RAZORPAY_KEY_SECRET = 'Tc6gQZj26kZjmebqM5obBvrT';   // Replace with your Razorpay Secret Key
+
+
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_rUx3Ufu3PNuJy8',
+  key_secret: 'Tc6gQZj26kZjmebqM5obBvrT'
+});
+
+app.use(cors({ origin: 'http://localhost:4200' }));
+//app.use(cors({ origin: 'https://aarioushashion.web.app' }));
 
 
 
@@ -42,6 +53,7 @@ app.post("/send-email", async (req, res) => {
     registredNo
 
  } = req.body;
+
 
 
 
@@ -254,11 +266,98 @@ app.use(bodyParser.urlencoded({ extended: true })); // For parsing application/x
   }
 });
 
-// Export the app as a Firebase Function
-exports.api = functions.https.onRequest(app);
+app.post('/create-order', async (req, res) => {
+  const options = {
+    amount: 500, // amount in paise
+    currency: 'INR',
+    receipt: 'order_rcptid_11'
+  };
 
-// app.listen(PORT, () => {
-//     console.log(`Server is running on http://localhost:${PORT}`);
-//   });
+  try {
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+app.post('/verify-payment', async (req, res) => {
+  const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+
+  const crypto = require('crypto');
+  const hmac = crypto.createHmac('sha256', 'Tc6gQZj26kZjmebqM5obBvrT');
+  hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
+  const generatedSignature = hmac.digest('hex');
+
+  if (generatedSignature === razorpay_signature) {
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ success: false, message: 'Invalid payment signature' });
+  }
+});
+
+
+
+
+app.post('/pay', async (req, res) => {
+  try {
+    const { amount, card } = req.body;
+
+    // Print API credentials before making a request
+console.log("🔹 Razorpay Key ID:", RAZORPAY_KEY_ID);
+console.log("🔹 Razorpay Secret:", RAZORPAY_KEY_SECRET);
+
+    if (!amount || !card || !card.number || !card.expiry_month || !card.expiry_year || !card.cvv) {
+      return res.status(400).json({ error: "Missing required payment fields" });
+    }
+
+    
+
+    // Create a Razorpay payment request
+    const authHeader = 'Basic ' + Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
+    console.log("🔹 authHeader:", authHeader);
+
+    const response = await axios.post(
+      'https://api.razorpay.com/v1/payments',
+      {
+        amount: amount,  // Amount in paise (e.g., ₹2 = 200)
+        currency: "INR",
+        method: "card",
+        card: {
+          number: card.number.replace(/\s/g, ''),  // Remove spaces from card number
+          expiry_month: card.expiry_month,
+          expiry_year: card.expiry_year,
+          cvv: card.cvv,
+          name: card.name
+        }
+      },
+      {
+        headers: {
+          "Authorization": authHeader,  // 🔥 Use Base64 encoded auth
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Payment Failed:", error.response ? error.response.data : error.message);
+    res.status(500).json({ error: error.response ? error.response.data : "Payment failed" });
+  }
+});
+
+
+
+
+
+
+
+
+// Export the app as a Firebase Function
+//exports.api = functions.https.onRequest(app);
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
 
  
